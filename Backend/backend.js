@@ -17,6 +17,7 @@ const BookSchema=new mongoose.Schema({
     image:String
 })
 const book=mongoose.model("Books",BookSchema)
+const favourite=mongoose.model("favourites",BookSchema)
 app.use(cors())
 
 app.use(express.json())
@@ -25,10 +26,10 @@ app.get("/",(req,resp)=>{
 })
 app.post("/login",async (req,res)=>{
     let a=await req.body
-    console.log(a)
+
     
     const b=await User1.find({Email:a.Email})
-    console.log(b)
+    
     if(b.length>0){
         if(b[0].password==a.password){
            return res.send("matched")
@@ -46,7 +47,6 @@ app.post("/login",async (req,res)=>{
 
 app.post("/register",async (req,res)=>{
     let a=await req.body
-    console.log(a)
     a={
         Email:a.Email,
         password:a.password
@@ -64,8 +64,46 @@ app.post("/register",async (req,res)=>{
 
 app.get("/book",async (req,res)=>{
     let book1=await book.find()
-    console.log(book1)
     return res.send(book1)
 
+})
+
+app.post("/favourite",async (req,res)=>{
+    let a=await req.body
+    console.log(a)
+    const b=await favourite.find(a)
+    if(b.length>0){
+        return res.send("Already in favourites")
+    }
+    else{
+        favourite.create(a)
+        return res.send("Done")
+
+    }
+
+})
+
+app.delete("/favdelete",async (req,res)=>{
+    let a=await req.body
+    console.log(a)
+    await favourite.findOneAndDelete(a)
+    return res.send("Done")
+})
+
+app.get("/favourite2",async (req,res)=>{
+    let book1=await favourite.find()
+    return res.send(book1)
+
+})
+
+app.post("/favouritemarked",async(req,res)=>{
+    
+    let found=await favourite.find(req.body)
+    if(found.length>0){
+        return res.send("Available")
+    }
+    else{
+        return res.send("Not Available")
+    }
 })
 app.listen(3000)
